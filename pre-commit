@@ -1,0 +1,30 @@
+#!/usr/bin/env bash
+# Git pre-commit hook: auto-sync AGENTS.md when files change
+
+set -e
+
+# Check if any tracked code/config files changed
+CHANGED=$(git diff --cached --name-only --diff-filter=ACMR | grep -E '\.(py|js|ts|go|rs|java|cpp|yaml|toml|md)$' || true)
+
+if [ -z "$CHANGED" ]; then
+    exit 0
+fi
+
+if command -v python3 &>/dev/null; then
+    PYTHON="python3"
+else
+    PYTHON="python"
+fi
+
+SYNC_SCRIPT=".agents/scripts/sync_agents.py"
+if [ ! -f "$SYNC_SCRIPT" ]; then
+    exit 0
+fi
+
+echo "pre-commit: Auto-syncing AGENTS.md project structure..."
+$PYTHON "$SYNC_SCRIPT" || true
+
+if ! git diff --quiet -- AGENTS.md 2>/dev/null; then
+    git add AGENTS.md
+    echo "pre-commit: AGENTS.md updated and staged."
+fi
