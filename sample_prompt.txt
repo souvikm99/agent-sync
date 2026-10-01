@@ -1,0 +1,1 @@
+Please set up the agent-sync tool in this repository using github.com/souvikm99/agent-sync
